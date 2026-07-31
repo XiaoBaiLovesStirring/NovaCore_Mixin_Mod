@@ -1,0 +1,76 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://maven.minecraftforge.net/' }
+        maven { url 'https://repo.spongepowered.org/maven' }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://maven.minecraftforge.net/' }
+    maven { url 'https://repo.spongepowered.org/maven' }
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2847'
+    implementation 'org.spongepowered:mixin:0.8.5'
+}
+
+minecraft {
+    mappings channel: 'stable', version: '39-1.12'
+    
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.mojang_level', 'debug'
+            mods {
+                novacore {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+mixin {
+    add sourceSets.main, 'novacore.mixin-refmap.json'
+}
+
+jar {
+    archiveBaseName.set('novacore-mixin')
+    manifest {
+        attributes(
+            'MixinConfigs': 'mixins.novacore.json'
+        )
+    }
+}
+
+task agentJar(type: Jar) {
+    archiveBaseName.set('novacore-agent')
+    from(sourceSets.main.output) {
+        include 'com/novacore/agent/**'
+    }
+    manifest {
+        attributes(
+            'Premain-Class': 'com.novacore.agent.NovaAgent',
+            'Can-Redefine-Classes': 'true',
+            'Can-Retransform-Classes': 'true'
+        )
+    }
+}
+
+assemble.dependsOn(agentJar)
+
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+    options.encoding = 'UTF-8'
+}

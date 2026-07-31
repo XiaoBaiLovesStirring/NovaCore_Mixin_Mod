@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.novacore.mixin",
+  "refmap": "mixins.novacore.refmap.json",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "LightingMixin",
+    "ChunkLoadingMixin",
+    "MemoryLeakMixin",
+    "EntityCullingMixin",
+    "MathOptMixin",
+    "OpenGLMixin",
+    "TickRateMixin",
+    "ParticleLimiterMixin",
+    "RenderAggressionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

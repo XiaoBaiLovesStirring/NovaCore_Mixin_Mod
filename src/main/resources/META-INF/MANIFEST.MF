@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+FMLCorePlugin: com.novacore.NovaCorePlugin
+FMLCorePluginContainsFMLMod: true
+ForceLoadAsMod: true
+MixinConfigs: novacore.mixins.json
