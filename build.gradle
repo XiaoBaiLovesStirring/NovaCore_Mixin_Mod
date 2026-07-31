@@ -5,7 +5,7 @@ buildscript {
         maven { url 'https://repo.spongepowered.org/maven' }
     }
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:4.1.+'
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
@@ -27,7 +27,6 @@ dependencies {
 
 minecraft {
     mappings channel: 'stable', version: '39-1.12'
-    
     runs {
         client {
             workingDirectory project.file('run')
