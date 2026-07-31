@@ -1,59 +1,103 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { name = "forge"; url = "https://files.minecraftforge.net/maven" }
-        maven { name = "sponge"; url = "https://repo.spongepowered.org/maven" }
-    }
-    dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
-        classpath "org.spongepowered:mixingradle:0.6-SNAPSHOT"
-    }
+// ------------------------------------------------------------
+// CleanroomMC – Forge Development Environment (ForgeDevEnv)
+// ------------------------------------------------------------
+plugins {
+    // Cleanroom 核心插件（提供 Forge userdev、映射、Mixin 支持）
+    id 'dev.gradleplugins.cleanroom' version '2.0.0'   // 如有新版请自行升级
+    // Shadow 用于生成带依赖的 CoreMod JAR
+    id 'com.github.johnrengelman.shadow' version '9.1.2'
 }
 
-apply plugin: "net.minecraftforge.gradle"
-apply plugin: "org.spongepowered.mixin"
-apply plugin: "java"
+// ------------------------------------------------------------
+// 项目基础信息
+// ------------------------------------------------------------
+group = 'com.novacore'
+version = '1.0-mixin-cleanroom'
+archivesBaseName = 'novacore-mixin'
 
-minecraft {
-    version = "1.12.2-14.23.5.2847"
-    runDir = "run"
-    mappings = "stable_39"
+// ------------------------------------------------------------
+// Cleanroom 配置
+// ------------------------------------------------------------
+cleanroom {
+    // 目标 Minecraft + Forge 版本（保持与原项目相同）
+    minecraftVersion = '1.12.2-14.23.5.2847'
+
+    // 映射层级：官方 → MCP → Yarn（在 IDE 中可直接使用 Mojang 原始类名）
+    mappings = ['official', 'mcp', 'yarn']
+
+    // 启用 Mixin 注解处理器
+    useMixin = true
+
+    // 自动生成 Access‑Transformer（如需访问 private/final 字段）
+    generateAccessTransformer = true
+}
+
+// ------------------------------------------------------------
+// 依赖声明
+// ------------------------------------------------------------
+repositories {
+    // Cleanroom 会自动拉取 Forge、MCP、Yarn、Mixin 等依赖
+    mavenCentral()
 }
 
 dependencies {
-    implementation "org.spongepowered:mixin:0.8.5"
+    // Mixin 运行时库（已由 Cleanroom 自动加入 runtime classpath）
+    implementation 'org.spongepowered:mixin:0.8.5'
+
+    // 编译时需要的 Forge API（仅在编译阶段出现，运行时由 userdev 提供）
+    compileOnly "net.minecraftforge:forge:1.12.2-14.23.5.2847:universal"
 }
 
-mixin {
-    add sourceSets.main, "novacore.mixin-refmap.json"
+// ------------------------------------------------------------
+// Shadow JAR – 生成包含 Mixin 的 CoreMod
+// ------------------------------------------------------------
+shadowJar {
+    archiveBaseName.set('novacore-mixin')
+    archiveClassifier.set('dev')
+    // 将所有 runtime 依赖（包括 mixin）打入同一个 jar
+    mergeServiceFiles()
+    // 如需避免冲突可自行 relocate（若不需要可删除）
+    relocate 'org.spongepowered.asm.mixin', 'com.novacore.mixin.reloc'
 }
 
-jar {
-    baseName = "novacore-mixin"
-    manifest {
-        attributes(
-            "MixinConfigs": "mixins.novacore.json"
-        )
-    }
-}
-
+// ------------------------------------------------------------
+// Java‑Agent JAR – 仅打包 agent 包
+// ------------------------------------------------------------
 task agentJar(type: Jar) {
-    baseName = "novacore-agent"
+    archiveBaseName.set('novacore-agent')
     from(sourceSets.main.output) {
-        include "com/novacore/agent/**"
+        include 'com/novacore/agent/**'   // 只打包 agent 包
     }
     manifest {
         attributes(
-            "Premain-Class": "com.novacore.agent.NovaAgent",
-            "Can-Redefine-Classes": "true",
-            "Can-Retransform-Classes": "true"
+                'Premain-Class': 'com.novacore.agent.NovaAgent',
+                'Can-Redefine-Classes': 'true',
+                'Can-Retransform-Classes': 'true'
         )
     }
 }
-
 assemble.dependsOn(agentJar)
 
-compileJava {
-    sourceCompatibility = targetCompatibility = "1.8"
-    options.encoding = "UTF-8"
+// ------------------------------------------------------------
+// 资源处理 – 把 native 库复制到输出目录
+// ------------------------------------------------------------
+processResources {
+    // 将 src/main/cpp 编译得到的 .so/.dll 直接拷贝到 build/libs
+    from('src/main/cpp') {
+        include '**/*.so', '**/*.dll'
+        into ''
+    }
 }
+
+// ------------------------------------------------------------
+// Java 编译选项（保持 1.8，确保兼容 1.12.2）
+// ------------------------------------------------------------
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    withSourcesJar()
+}
+
