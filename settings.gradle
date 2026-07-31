@@ -1,10 +1,1 @@
-pluginManagement {
-    repositories {
-        gradlePluginPortal()
-        maven { url "https://maven.minecraftforge.net/" }
-        maven { url "https://repo.spongepowered.org/maven" }
-        mavenCentral()
-    }
-}
-
 rootProject.name = 'NovaCore_Mixin_Mod'

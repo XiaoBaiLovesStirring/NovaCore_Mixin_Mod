@@ -1,12 +1,18 @@
 buildscript {
     repositories {
         mavenCentral()
-        maven { url "https://maven.minecraftforge.net/" }
-        maven { url "https://repo.spongepowered.org/maven" }
+        maven {
+            name = "forge"
+            url = "https://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sponge"
+            url = "https://repo.spongepowered.org/maven"
+        }
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:4.1.21"
-        classpath "org.spongepowered:mixingradle:0.7-SNAPSHOT"
+        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
+        classpath "org.spongepowered:mixingradle:0.6-SNAPSHOT"
     }
 }
 
@@ -15,22 +21,12 @@ apply plugin: "org.spongepowered.mixin"
 apply plugin: "java"
 
 minecraft {
-    mappings channel: "stable", version: "39-1.12"
-    runs {
-        client {
-            workingDirectory project.file("run")
-            property "forge.logging.mojang_level", "debug"
-            mods {
-                novacore {
-                    source sourceSets.main
-                }
-            }
-        }
-    }
+    version = "1.12.2-14.23.5.2847"
+    runDir = "run"
+    mappings = "stable_39"
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.12.2-14.23.5.2847"
     implementation "org.spongepowered:mixin:0.8.5"
 }
 
