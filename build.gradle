@@ -27,17 +27,6 @@ dependencies {
 
 minecraft {
     mappings channel: 'stable', version: '39-1.12'
-    runs {
-        client {
-            workingDirectory project.file('run')
-            property 'forge.logging.mojang_level', 'debug'
-            mods {
-                novacore {
-                    source sourceSets.main
-                }
-            }
-        }
-    }
 }
 
 mixin {
