@@ -39,7 +39,7 @@ mixin {
 }
 
 jar {
-    archiveBaseName.set("novacore-mixin")
+    baseName = "novacore-mixin"
     manifest {
         attributes(
             "MixinConfigs": "mixins.novacore.json"
@@ -48,7 +48,7 @@ jar {
 }
 
 task agentJar(type: Jar) {
-    archiveBaseName.set("novacore-agent")
+    baseName = "novacore-agent"
     from(sourceSets.main.output) {
         include "com/novacore/agent/**"
     }
